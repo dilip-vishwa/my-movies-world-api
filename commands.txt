@@ -11,3 +11,10 @@ git add .
 git commit -m "My first commit"
 heroku git:remote -a my-movies-world-api
 git push heroku master
+
+
+mongodb: 
+username: movies-db-user
+password: PjONGrTy4MaCi4Ir
+
+mongodb+srv://movies-db-user:<password>@cluster0.uz3pi.mongodb.net/movies_db?retryWrites=true&w=majority
