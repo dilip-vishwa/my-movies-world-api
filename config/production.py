@@ -1,3 +1,5 @@
+import os
+
 from umongo import MotorAsyncIOInstance
 
 mongo_db_config = {
@@ -9,5 +11,5 @@ mongo_db_config = {
     },
     "LAZY_UMONGO": MotorAsyncIOInstance()
 }
-port = 8000
+port = os.environ['PORT']
 debug = False
