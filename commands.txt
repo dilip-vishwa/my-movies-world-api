@@ -13,8 +13,26 @@ heroku git:remote -a my-movies-world-api
 git push heroku master
 
 
-mongodb: 
+mongodb:
 username: movies-db-user
 password: PjONGrTy4MaCi4Ir
 
 mongodb+srv://movies-db-user:<password>@cluster0.uz3pi.mongodb.net/movies_db?retryWrites=true&w=majority
+
+
+
+
+
+# add codes as column name in csv, then run below command to add data in csv
+mongoimport -d brandx -c unique_codes --type csv --file 250_unique_codes.csv --headerline
+
+# run below command to take backup of data
+mongodump -d movies_db -o /home/adming/mongodb_backup/movies_db/movies_db/
+
+# run below command to restore data
+mongorestore -d movies_db -o /home/adming/mongodb_backup/movies_db/movies_db/
+
+
+sudo docker rm -f movies_db
+sudo docker build -t movies_db .
+sudo docker run --net host --name movies_db movies_db

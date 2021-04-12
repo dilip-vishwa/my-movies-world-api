@@ -1,2 +1,5 @@
 sanic
 sanic-mongodb-extension
+pymongo[srv]
+sanic-cors
+pyjwt
