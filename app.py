@@ -1,5 +1,6 @@
+import logging
 import os
-
+logging.getLogger('sanic_cors').level = logging.DEBUG
 from sanic import Sanic, response
 from sanic_cors import CORS
 import jwt
@@ -10,7 +11,8 @@ else:
     from config import development as settings
 
 app = Sanic("My Hello, world app")
-CORS(app)
+
+CORS(app, supports_credentials=True)
 
 
 async def extract_user_from_request(request):
