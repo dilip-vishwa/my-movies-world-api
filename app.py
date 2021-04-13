@@ -12,7 +12,7 @@ else:
 
 app = Sanic("My Hello, world app")
 
-CORS(app, supports_credentials=True)
+CORS(app)
 
 
 async def extract_user_from_request(request):
