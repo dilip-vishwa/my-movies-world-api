@@ -1,4 +1,5 @@
 import asyncio
+import re
 import uuid
 import datetime
 from urllib.parse import unquote
@@ -6,45 +7,6 @@ from sanic.views import HTTPMethodView
 from sanic import response
 from app_instance import app
 from models import Movies
-
-
-# @app.get('/movies')
-# async def get_movies(request):
-#     movie = await Movies.find_one({"name": "A new rockstar!"})
-#     if movie:
-#         return response.json(movie.dump())
-#     else:
-#         return response.json('{"result": "Movie not found by name"}')
-#
-#
-# @app.post('/movies')
-# async def create_movies(request):
-#     # print(request.json)
-#     # print(request.body)
-#     # print(request.args)
-#     # print(request.query_string)
-#     # print(request.query_args)
-#     movie = Movies(name="A new rockstar!", popularity=3, director="asdsadsa", genre=["abc", "xnd"], imdb_score=34)
-#     await movie.commit()
-#     return response.json(movie.dump())
-#     # return response.json('{}')
-#
-#
-# @app.put('/movies/<name>')
-# async def update_movies(request, name):
-#     from urllib.parse import unquote
-#     name = unquote(name)
-#     movie = await Movies.update({"name": name}, {"$set": {"director": "my_fav"}})
-#     return response.json(movie.dump())
-#
-#
-# @app.delete('/movies')
-# async def delete_movies(request):
-#     movie = await Movies.remove({"name": "A new rockstar!"})
-#     return response.json(movie.dump())
-
-
-
 
 
 class MoviesView(HTTPMethodView):
@@ -58,7 +20,12 @@ class MoviesView(HTTPMethodView):
             limit = int(request.args['limit'][0])
             page = int(request.args['page'][0])
             skip = page * limit - limit
-            movie = Movies.collection.find({}).sort([("insert_datetime", -1)]).limit(limit).skip(skip)
+            query = {}
+            if 'movie_name' in request.args:
+                movie_name = unquote(request.args['movie_name'][0])
+                query = {"name": re.compile(movie_name, re.IGNORECASE)}
+
+            movie = Movies.collection.find(query).sort([("insert_datetime", -1)]).limit(limit).skip(skip)
             movie_list = []
             for r in await movie.to_list(length=limit):
                 del r['_id']
@@ -70,23 +37,26 @@ class MoviesView(HTTPMethodView):
             return response.json({"result": "Invalid data in request"})
 
         if movie:
+            print(movie)
             edit_mode = False
             if request.ctx.user and request.ctx.user['role'] == 'admin':
                 edit_mode = True
 
-            return response.json({"result": movie, "edit_mode": edit_mode})
+            return response.json({"result": movie, "edit_mode": edit_mode}, status=200)
         else:
-            return response.json({"result": "Movie not found"})
+            return response.json({"result": [], "message": "Movie not found"}, status=200)
 
 
     async def post(self, request):
         movies_data = request.json
-        movies_data['movie_id'] = str(uuid.uuid4())
+        movie_id = str(uuid.uuid4())
+        movies_data['movie_id'] = movie_id
         movies_data['insert_datetime'] = str(datetime.datetime.now())
         movies_data['update_datetime'] = None
         movie = Movies(**movies_data)
         await movie.commit()
-        return response.json({"result": "Successfully Saved Movie"})
+        return response.json({"result": "Successfully Saved Movie", "movie_id": movie_id}, status=201)
+
 
     async def put(self, request):
         movie_id = unquote(request.args['movie_id'][0])
@@ -100,8 +70,6 @@ class MoviesView(HTTPMethodView):
         else:
             return response.json({"result": "Data not found to update"}, status=404)
 
-    # async def patch(self, request):
-    #     return text("I am patch method")
 
     async def delete(self, request):
         movie_id = unquote(request.args['movie_id'][0])

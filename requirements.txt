@@ -3,3 +3,6 @@ sanic-mongodb-extension
 pymongo[srv]
 sanic-cors
 pyjwt
+requests
+coverage
+pytest
