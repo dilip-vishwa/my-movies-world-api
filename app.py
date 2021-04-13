@@ -75,4 +75,4 @@ from views.users import views as users
 
 
 if __name__ == '__main__':
-    app.run(debug=settings.debug, port=settings.port)
+    app.run(debug=settings.debug, port=settings.port, host="0.0.0.0")
